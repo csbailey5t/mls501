@@ -1,0 +1,68 @@
+---
+title: "Covid-19 Twitter Data Activity"
+author: "Scott Bailey"
+date: "5/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries}
+library(tidyverse, warn.conflicts = FALSE)
+library(leaflet, warn.conflicts = FALSE)
+library(stringr)
+library(tidytext)
+library(wordcloud)
+```
+
+```{r dataimports}
+tweets <- read_csv("covid_50k.csv")
+sample_n(tweets, 10)
+```
+
+```{r allhashtags}
+tweets %>%
+  unnest_tokens(hashtag, hashtags, token = "words", to_lower = TRUE) %>%
+  count(hashtag) %>%
+  arrange(-n)
+```
+
+```{r wordcloud}
+tweets %>%
+  unnest_tokens(hashtag, hashtags, token = "words", to_lower = TRUE) %>%
+  count(hashtag) %>%
+  with(wordcloud(hashtag, n, random.order = FALSE, max.words = 50))
+```
+
+
+```{r hashtagfilter}
+tweets %>%
+  filter(str_detect(hashtags, "confinement"))
+
+# Find tweets that contain one from a set of hashtags; the pipe here is an "or" operator
+tweets %>%
+  filter(str_detect(hashtags, "trump") | str_detect(hashtags, "biden"))
+```
+What if we wanted to understand the most liked or "favorited" tweets in this sample of tweets? We can arrange the tweets in descending order according to the column `favorite_count`. 
+
+```{r mostlikedtweets}
+tweets %>%
+  arrange(-favorite_count)
+```
+
+We can also map tweets. 
+
+```{r}
+# Notice that when we drop all the tweets where we don't have coordinate information, we only have 52 of 50,000 left.
+tweets %>%
+  drop_na(coordinates) %>%
+  separate(coordinates, c("lon", "lat"), sep = ",", convert = T) %>%
+  leaflet() %>%
+    addTiles() %>%  # Add default OpenStreetMap map tiles
+    addMarkers(~as.numeric(lon), ~as.numeric(lat), popup = ~as.character(text),
+             labelOptions = labelOptions(textsize = "20px"))
+```
+
