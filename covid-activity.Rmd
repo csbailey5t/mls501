@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Building on our conversations on social media, analysis, and surveillance, let's actually do a bit of work with a random subset of Twitter data about Covid-19. Here's the full dataset: https://zenodo.org/record/3842180. The random sample of 50k tweets came from the data as it was on April 13, 2020. 
 
+First, you should see a yellow pop-up bar at the top of this pane, asking if you want to install several packages. Go ahead and hit `install`. 
+
 Let's start by importing different libraries into our R session that will help with different parts of our exploration and analysis. 
 
 ```{r libraries}
