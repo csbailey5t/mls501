@@ -50,6 +50,21 @@ tweets %>%
   count(hashtag) %>%
   with(wordcloud(hashtag, n, random.order = FALSE, max.words = 50))
 ```
+
+A different way to visualize this is to use a horizontal bar chart. 
+
+```{r hashtagchart}
+tweets %>%
+  unnest_tokens(hashtag, hashtags, token = "words", to_lower = TRUE) %>%
+  drop_na(hashtag) %>%
+  count(hashtag) %>%
+  top_n(20) %>%
+  mutate(hashtag = reorder(hashtag, n)) %>%
+  ggplot(aes(hashtag, n)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip()
+```
+
 We can start to subset our data based on hashtags. Let's try to find just the tweets that have hashtags that contain the word `confinement`. 
 
 ```{r hashtagfilter}
@@ -74,7 +89,7 @@ tweets %>%
 
 Some of the tweets do contain coordinate data that indicates where the tweet was written. We need to do a bit of work to break apart the longitude and latitude, but once we've done that, we can send the data to the `leaflet` library for mapping. Once you've run the code, try clicking on the markers on the map. 
 
-```{r}
+```{r map}
 # Notice that when we drop all the tweets where we don't have coordinate information, we only have 52 of 50,000 left.
 tweets %>%
   drop_na(coordinates) %>%
@@ -89,10 +104,14 @@ We've just been exploring so far, but let's think about some of the applications
 
 Let's start by thinking like someone who might want to see if people are tweeting about feeling ill, and find any tweets that mention a set of related words. We'll then pull all the screennames and some associated info for those tweets. We'll do this without narrowing further, but there are methods in natural language processing that would let you find just tweets where a person seems to talking about themselves or another person coughing, sneezing, breath hard, feeling ill, etc. 
 
-```{r}
+```{r extractnamesandplaces}
 tweets %>%
   filter(str_detect(text, "cough") | str_detect(text, "sick") | str_detect(text, "breathing")) %>%
   select(user_name, user_location, user_description, text)
 ```
 
 Let's take a step back though - this same process of filtering tweets by content and looking at user information, including locations, is exactly the same basis as could be used to work on predicting disease spread, or doing early detection of plant or animal disease. 
+
+If you want to get started with getting Twitter data yourself, so that you can analyze the data you're interested in, the first thing to do is apply for a Twitter Developer account at https://developer.twitter.com/en/apply-for-access. Once you have that you can use different programming languages or applications to help you download and analyze data. If you need help, just get in touch with us in Data and Visualization Services. 
+
+
